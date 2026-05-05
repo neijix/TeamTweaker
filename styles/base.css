@@ -1,0 +1,415 @@
+/* ============================================================
+   TeamTweaker — Base Styles
+   Injected into Microsoft Teams to improve appearance.
+   Each section is toggled via CSS classes on <html>.
+   ============================================================ */
+
+/* -----------------------------------------------------------
+   1. SECTION COLORS — per-section backgrounds are applied
+      by content.js via injected <style> + inline styles.
+      These are fallback/enhancement rules:
+   ----------------------------------------------------------- */
+/* Text/fill color is now set per-section by the injected stylesheet
+   in content.js buildSectionStylesheet(). No hardcoded fallback needed. */
+html.tf-sectioncolors [data-tf-section] {
+  border-radius: 6px !important;
+  transition: background-color 0.2s ease !important;
+  position: relative;
+}
+
+/* Tint the child items within a section group with a faded version of the
+   section color — the injected stylesheet provides the per-color rgba values;
+   these rules act as structural fallbacks and transition helpers */
+html.tf-sectioncolors [data-tf-section-group] > *:not([data-tf-section]) {
+  border-radius: 4px;
+  transition: box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+/* No hover brightness change — keep section colors stable */
+
+/* -----------------------------------------------------------
+   2. CUSTOM ACCENT COLOR
+   ----------------------------------------------------------- */
+html.tf-accent .fui-FluentProvider {
+  --colorBrandBackground: var(--tf-accent-color, #6264a7) !important;
+  --colorBrandBackgroundHover: var(--tf-accent-hover, #505298) !important;
+  --colorBrandBackgroundPressed: var(--tf-accent-pressed, #3e4089) !important;
+  --colorBrandForeground1: var(--tf-accent-color, #6264a7) !important;
+  --colorBrandForeground2: var(--tf-accent-color, #6264a7) !important;
+  --colorCompoundBrandForeground1: var(--tf-accent-color, #6264a7) !important;
+  --colorCompoundBrandBackground: var(--tf-accent-color, #6264a7) !important;
+  --colorCompoundBrandStroke: var(--tf-accent-color, #6264a7) !important;
+}
+
+/* -----------------------------------------------------------
+   3. ENHANCED READABILITY – font size + line-height app-wide
+      --tf-font-size is set on <html> by content.js (px).
+      Teams uses Fluent typography classes and many explicit
+      font sizes; we override the main surfaces and common
+      text classes so the slider affects sidebar, chat, composer,
+      headers, and quick views — not only message bubbles.
+   ----------------------------------------------------------- */
+
+/* Default text size on shell (do not set font-size on html — Teams uses rem
+   for layout; changing the root rem would scale paddings/margins unpredictably). */
+html.tf-readability body,
+html.tf-readability .fui-FluentProvider {
+  font-size: var(--tf-font-size, 14px) !important;
+}
+
+/* Chat message bodies (original targets) */
+html.tf-readability .fui-ChatMessage__body,
+html.tf-readability [data-tid="messageBodyContent"] {
+  font-size: var(--tf-font-size, 14px) !important;
+  line-height: 1.5 !important;
+}
+
+/* Main content column (chat + surrounding chrome) */
+html.tf-readability [role="main"],
+html.tf-readability [data-tid="message-pane"],
+html.tf-readability [data-tid="message-pane-list-container"],
+html.tf-readability [data-tid="message-pane-body"],
+html.tf-readability [data-tid="message-pane-footer"] {
+  font-size: var(--tf-font-size, 14px) !important;
+}
+
+/* Left app rail + chat / channel list rail */
+html.tf-readability [data-tid="app-bar"],
+html.tf-readability [data-tid="left-rail"],
+html.tf-readability [data-tid="simple-collab-dnd-rail"] {
+  font-size: var(--tf-font-size, 14px) !important;
+}
+
+/* Composer and draft / rich input */
+html.tf-readability [data-tid="ckeditor"],
+html.tf-readability [data-tid="newMessageCommands"],
+html.tf-readability [data-tid="message-input-footer"],
+html.tf-readability [data-tid="message-input"] {
+  font-size: var(--tf-font-size, 14px) !important;
+}
+
+html.tf-readability [contenteditable="true"] {
+  font-size: var(--tf-font-size, 14px) !important;
+  line-height: 1.45 !important;
+}
+
+/* Fluent typography primitives used across Teams */
+html.tf-readability .fui-Text,
+html.tf-readability .fui-Body1,
+html.tf-readability .fui-Body1Strong,
+html.tf-readability .fui-Body2,
+html.tf-readability .fui-Body2Strong,
+html.tf-readability .fui-Caption1,
+html.tf-readability .fui-Caption1Strong,
+html.tf-readability .fui-Caption2,
+html.tf-readability .fui-Caption2Strong,
+html.tf-readability .fui-Subtitle1,
+html.tf-readability .fui-Subtitle2,
+html.tf-readability .fui-Subtitle2Strong,
+html.tf-readability .fui-Title1,
+html.tf-readability .fui-Title2,
+html.tf-readability .fui-Title3 {
+  font-size: var(--tf-font-size, 14px) !important;
+  line-height: 1.45 !important;
+}
+
+/* Tree rows (sidebar) — Fluent often sets smaller px on nested spans */
+html.tf-readability [data-tid="simple-collab-dnd-rail"] .fui-TreeItem,
+html.tf-readability [data-tid="simple-collab-dnd-rail"] .fui-TreeItem *:not(svg):not(svg *) {
+  font-size: var(--tf-font-size, 14px) !important;
+}
+
+/* Chat cards / message chrome */
+html.tf-readability .fui-ChatMessage,
+html.tf-readability .fui-ChatMessage *:not(svg):not(svg *) {
+  font-size: var(--tf-font-size, 14px) !important;
+}
+
+/* -----------------------------------------------------------
+   4. CLEAN CHAT BUBBLES – softer radius & subtle shadow
+   ----------------------------------------------------------- */
+html.tf-bubbles .fui-ChatMessage {
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+  margin-bottom: 2px !important;
+}
+
+html.tf-bubbles .fui-ChatMessage__body {
+  border-radius: 12px !important;
+}
+
+/* -----------------------------------------------------------
+   5. HIDE CLUTTER — remove non-essential chrome
+   ----------------------------------------------------------- */
+html.tf-declutter [data-tid="app-bar-meet-button"],
+html.tf-declutter [data-tid="app-bar-search"],
+html.tf-declutter [aria-label="Banner"],
+html.tf-declutter [data-tid="whatsnew-button"] {
+  display: none !important;
+}
+
+/* -----------------------------------------------------------
+   7. SMOOTH ANIMATIONS
+   ----------------------------------------------------------- */
+html.tf-smooth * {
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease,
+    box-shadow 0.15s ease, opacity 0.15s ease !important;
+}
+
+/* -----------------------------------------------------------
+   8. FOCUSED SIDEBAR — narrower left rail
+   ----------------------------------------------------------- */
+html.tf-narrowsidebar [data-tid="app-bar"],
+html.tf-narrowsidebar [data-tid="left-rail"] {
+  width: 60px !important;
+  min-width: 60px !important;
+}
+
+html.tf-narrowsidebar [data-tid="app-bar"] .fui-Tab__content {
+  display: none !important;
+}
+
+/* -----------------------------------------------------------
+   9. CUSTOM FONT
+   Teams sets explicit font-family on many Fluent nodes; mirror readability
+   reach so monospace / terminal stacks (e.g. Matrix preset) apply broadly.
+   ----------------------------------------------------------- */
+html.tf-customfont body,
+html.tf-customfont .fui-FluentProvider {
+  font-family: var(--tf-font-family, "Segoe UI", system-ui, sans-serif) !important;
+}
+
+html.tf-customfont [role="main"],
+html.tf-customfont [data-tid="message-pane"],
+html.tf-customfont [data-tid="message-pane-list-container"],
+html.tf-customfont [data-tid="message-pane-body"],
+html.tf-customfont [data-tid="message-pane-footer"],
+html.tf-customfont [data-tid="app-bar"],
+html.tf-customfont [data-tid="left-rail"],
+html.tf-customfont [data-tid="simple-collab-dnd-rail"],
+html.tf-customfont [data-tid="ckeditor"],
+html.tf-customfont [data-tid="newMessageCommands"],
+html.tf-customfont [data-tid="message-input-footer"],
+html.tf-customfont [data-tid="message-input"],
+html.tf-customfont [contenteditable="true"] {
+  font-family: var(--tf-font-family, "Segoe UI", system-ui, sans-serif) !important;
+}
+
+html.tf-customfont .fui-Text,
+html.tf-customfont .fui-Body1,
+html.tf-customfont .fui-Body1Strong,
+html.tf-customfont .fui-Body2,
+html.tf-customfont .fui-Body2Strong,
+html.tf-customfont .fui-Caption1,
+html.tf-customfont .fui-Caption1Strong,
+html.tf-customfont .fui-Caption2,
+html.tf-customfont .fui-Caption2Strong,
+html.tf-customfont .fui-Subtitle1,
+html.tf-customfont .fui-Subtitle2,
+html.tf-customfont .fui-Subtitle2Strong,
+html.tf-customfont .fui-Title1,
+html.tf-customfont .fui-Title2,
+html.tf-customfont .fui-Title3 {
+  font-family: var(--tf-font-family, "Segoe UI", system-ui, sans-serif) !important;
+}
+
+html.tf-customfont [data-tid="simple-collab-dnd-rail"] .fui-TreeItem,
+html.tf-customfont [data-tid="simple-collab-dnd-rail"] .fui-TreeItem *:not(svg):not(svg *) {
+  font-family: var(--tf-font-family, "Segoe UI", system-ui, sans-serif) !important;
+}
+
+html.tf-customfont .fui-ChatMessage,
+html.tf-customfont .fui-ChatMessage *:not(svg):not(svg *) {
+  font-family: var(--tf-font-family, "Segoe UI", system-ui, sans-serif) !important;
+}
+
+/* -----------------------------------------------------------
+   10. UNREAD HIGHLIGHT
+   Target: conversation rows in the left-rail tree that contain
+   [data-tid="unread"] — confirmed selector from live Teams DOM.
+   Row element: .fui-TreeItem[role="treeitem"] inside
+   [data-tid="simple-collab-dnd-rail"]
+   ----------------------------------------------------------- */
+
+/* Bold the row that directly owns the unread badge.
+   Use :has(> ...) or scope carefully so nested TreeItems
+   (other chats in the same group) are NOT colored. */
+html.tf-unreadhighlight
+  [data-tid="simple-collab-dnd-rail"]
+  .fui-TreeItem:has([data-tid="unread"]) {
+  font-weight: 700 !important;
+}
+
+/* Color text only inside the DIRECT content of the unread row —
+   but NOT child .fui-TreeItem rows (other conversations in the group).
+   We target all descendants (*) then undo it for nested TreeItems. */
+html.tf-unreadhighlight
+  [data-tid="simple-collab-dnd-rail"]
+  .fui-TreeItem:has([data-tid="unread"]) > *:not([role="group"]) *,
+html.tf-unreadhighlight
+  [data-tid="simple-collab-dnd-rail"]
+  .fui-TreeItem:has([data-tid="unread"]) > *:not([role="group"]) {
+  color: var(--tf-unread-color, #6264a7) !important;
+  font-weight: 700 !important;
+  background-color: var(--tf-unread-highlight, transparent) !important;
+  border-radius: 2px;
+}
+
+/* Make the unread count badge text match the chosen color */
+html.tf-unreadhighlight
+  [data-tid="simple-collab-dnd-rail"]
+  .fui-TreeItem:has([data-tid="unread"])
+  [data-tid="unread"] {
+  color: var(--tf-unread-color, #6264a7) !important;
+  font-weight: 700 !important;
+}
+
+/* -----------------------------------------------------------
+   11. ACTIVE CHAT HIGHLIGHT
+   Target: the currently selected conversation row in the
+   left-rail tree. Teams marks the active row with
+   tabindex="0" while all other rows have tabindex="-1".
+   We also keep aria-selected/aria-current as fallbacks in
+   case Teams changes behavior across versions.
+
+   IMPORTANT: Section/group headers are also .fui-TreeItem
+   elements with tabindex="0" when focused, but they contain
+   a [role="group"] direct child that wraps all child rows.
+   We exclude them with :not(:has(> [role="group"])) so only
+   leaf conversation rows get the active chat styling.
+   ----------------------------------------------------------- */
+
+/* Background tint on the active row — applied both to the TreeItem itself
+   AND its direct non-group children, because Teams often paints an opaque
+   background on a child wrapper (Griffel atomic classes) that covers the
+   TreeItem-level background.
+   IMPORTANT: We exclude [data-tf-section] (our own attribute on section
+   headers) as a reliable fallback — :has(> [role="group"]) alone is fragile
+   because Teams DOM structure varies across versions. */
+html.tf-activechat
+  [data-tid="simple-collab-dnd-rail"]
+  .fui-TreeItem[role="treeitem"][tabindex="0"]:not(:has(> [role="group"])):not([data-tf-section]),
+html.tf-activechat
+  [data-tid="simple-collab-dnd-rail"]
+  .fui-TreeItem[aria-selected="true"]:not(:has(> [role="group"])):not([data-tf-section]),
+html.tf-activechat
+  [data-tid="simple-collab-dnd-rail"]
+  .fui-TreeItem[aria-current="true"]:not(:has(> [role="group"])):not([data-tf-section]),
+html.tf-activechat
+  [data-tid="simple-collab-dnd-rail"]
+  .fui-TreeItem[aria-current="location"]:not(:has(> [role="group"])):not([data-tf-section]),
+html.tf-activechat
+  [data-tid="simple-collab-dnd-rail"]
+  .fui-TreeItem[role="treeitem"][tabindex="0"]:not(:has(> [role="group"])):not([data-tf-section]) > *:not([role="group"]),
+html.tf-activechat
+  [data-tid="simple-collab-dnd-rail"]
+  .fui-TreeItem[aria-selected="true"]:not(:has(> [role="group"])):not([data-tf-section]) > *:not([role="group"]),
+html.tf-activechat
+  [data-tid="simple-collab-dnd-rail"]
+  .fui-TreeItem[aria-current="true"]:not(:has(> [role="group"])):not([data-tf-section]) > *:not([role="group"]),
+html.tf-activechat
+  [data-tid="simple-collab-dnd-rail"]
+  .fui-TreeItem[aria-current="location"]:not(:has(> [role="group"])):not([data-tf-section]) > *:not([role="group"]) {
+  background-color: var(--tf-activechat-bg, #6264a7) !important;
+  border-radius: 6px !important;
+}
+
+/* Color text inside the active row */
+html.tf-activechat
+  [data-tid="simple-collab-dnd-rail"]
+  .fui-TreeItem[role="treeitem"][tabindex="0"]:not(:has(> [role="group"])):not([data-tf-section]) > *:not([role="group"]) *,
+html.tf-activechat
+  [data-tid="simple-collab-dnd-rail"]
+  .fui-TreeItem[role="treeitem"][tabindex="0"]:not(:has(> [role="group"])):not([data-tf-section]) > *:not([role="group"]),
+html.tf-activechat
+  [data-tid="simple-collab-dnd-rail"]
+  .fui-TreeItem[aria-selected="true"]:not(:has(> [role="group"])):not([data-tf-section]) > *:not([role="group"]) *,
+html.tf-activechat
+  [data-tid="simple-collab-dnd-rail"]
+  .fui-TreeItem[aria-selected="true"]:not(:has(> [role="group"])):not([data-tf-section]) > *:not([role="group"]),
+html.tf-activechat
+  [data-tid="simple-collab-dnd-rail"]
+  .fui-TreeItem[aria-current="true"]:not(:has(> [role="group"])):not([data-tf-section]) > *:not([role="group"]) *,
+html.tf-activechat
+  [data-tid="simple-collab-dnd-rail"]
+  .fui-TreeItem[aria-current="true"]:not(:has(> [role="group"])):not([data-tf-section]) > *:not([role="group"]),
+html.tf-activechat
+  [data-tid="simple-collab-dnd-rail"]
+  .fui-TreeItem[aria-current="location"]:not(:has(> [role="group"])):not([data-tf-section]) > *:not([role="group"]) *,
+html.tf-activechat
+  [data-tid="simple-collab-dnd-rail"]
+  .fui-TreeItem[aria-current="location"]:not(:has(> [role="group"])):not([data-tf-section]) > *:not([role="group"]) {
+  color: var(--tf-activechat-color, #6264a7) !important;
+  font-weight: 600 !important;
+}
+
+/* Left accent border on the active row */
+html.tf-activechat
+  [data-tid="simple-collab-dnd-rail"]
+  .fui-TreeItem[role="treeitem"][tabindex="0"]:not(:has(> [role="group"])):not([data-tf-section]),
+html.tf-activechat
+  [data-tid="simple-collab-dnd-rail"]
+  .fui-TreeItem[aria-selected="true"]:not(:has(> [role="group"])):not([data-tf-section]),
+html.tf-activechat
+  [data-tid="simple-collab-dnd-rail"]
+  .fui-TreeItem[aria-current="true"]:not(:has(> [role="group"])):not([data-tf-section]),
+html.tf-activechat
+  [data-tid="simple-collab-dnd-rail"]
+  .fui-TreeItem[aria-current="location"]:not(:has(> [role="group"])):not([data-tf-section]) {
+  box-shadow: inset 3px 0 0 var(--tf-activechat-accent, #6264a7) !important;
+}
+
+/* -----------------------------------------------------------
+   12. CUSTOM BACKGROUND — chat-thread wallpaper only
+       content.js injects `background-image` on `[data-tid="message-pane-body"]`
+       and `[data-tid="message-pane-list-container"]`. Do not target those nodes
+       with `background-image: none` here or the thread stays blank.
+   ----------------------------------------------------------- */
+html.tf-custombackground {
+  --tf-wallpaper-glass: rgba(18, 18, 26, 0.38);
+}
+
+/*
+ * Frosted shell chrome only (not the message list / thread — those show the image).
+ * Composer row: blur once on the footer strip only — inner [data-tid="message-input"] /
+ * ckeditor used to get a second, stronger glass layer and looked like a “card” on top.
+ */
+html.tf-custombackground [data-tid="message-pane-footer"],
+html.tf-custombackground [data-tid="left-rail"],
+html.tf-custombackground [data-tid="app-bar"],
+html.tf-custombackground [data-tid="simple-collab-dnd-rail"] {
+  background-color: var(--tf-wallpaper-glass) !important;
+  background-image: none !important;
+  backdrop-filter: blur(14px) saturate(1.1) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(1.1) !important;
+}
+
+/*
+ * Inside the footer: let Teams’ own input chrome show; no extra tint from us (avoids nested rectangle).
+ */
+html.tf-custombackground [data-tid="message-pane-footer"] [data-tid="message-input"],
+html.tf-custombackground [data-tid="message-pane-footer"] [data-tid="message-input-footer"],
+html.tf-custombackground [data-tid="message-pane-footer"] [data-tid="ckeditor"],
+html.tf-custombackground [data-tid="message-pane-footer"] [data-tid="newMessageCommands"] {
+  background-color: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/*
+ * Message bubbles are otherwise fully opaque — the wallpaper only showed in gaps.
+ * Glassy bubbles so the image shows through the conversation column too.
+ */
+html.tf-custombackground .fui-ChatMessage__body {
+  background-color: rgba(38, 38, 48, 0.42) !important;
+  backdrop-filter: blur(12px) saturate(1.08) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(1.08) !important;
+  box-shadow: 0 1px 10px rgba(0, 0, 0, 0.28) !important;
+}
+
+/* Outgoing (vous) — translucent brand tint when Teams marks the row */
+html.tf-custombackground .fui-ChatMessage[class*="outgoing"] .fui-ChatMessage__body,
+html.tf-custombackground .fui-ChatMessage[class*="from-self"] .fui-ChatMessage__body,
+html.tf-custombackground .fui-ChatMessage[data-layout="outgoing"] .fui-ChatMessage__body {
+  background-color: rgba(72, 82, 180, 0.48) !important;
+}

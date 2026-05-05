@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TeamTweaker</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="popup">
+    <header class="header">
+      <div class="logo">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <rect x="2" y="2" width="20" height="20" rx="4" fill="var(--accent)" />
+          <path d="M7 12h10M12 7v10" stroke="#fff" stroke-width="2.2" stroke-linecap="round" />
+        </svg>
+        <h1>TeamTweaker</h1>
+      </div>
+      <div class="header-actions">
+        <span class="version">v1.0</span>
+        <button id="openTabBtn" class="open-tab-btn" title="Open settings in a full tab">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+            <polyline points="15 3 21 3 21 9"/>
+            <line x1="10" y1="14" x2="21" y2="3"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="settings">
+      <!-- Section Colors -->
+      <label class="toggle-row">
+        <div class="label-group">
+          <span class="label-title">Section Colors</span>
+          <span class="label-desc">Background color per sidebar section</span>
+        </div>
+        <input type="checkbox" id="sectioncolors" />
+        <span class="switch"></span>
+      </label>
+
+      <div class="sub-option" id="sectionColorsGroup">
+        <div class="section-add-row">
+          <input type="text" id="newSectionName" class="section-input" placeholder="Section name…" />
+          <input type="color" id="newSectionColor" value="#6264a7" title="Background color" />
+          <input type="color" id="newSectionTextColor" value="#ffffff" title="Text color" />
+          <button id="addSectionBtn" class="section-add-btn" title="Add">+</button>
+        </div>
+        <div class="section-list" id="sectionList">
+          <!-- Entries rendered by JS -->
+        </div>
+        <div class="section-detect-row">
+          <button type="button" id="detectSectionsBtn" class="section-detect-btn" title="Scan the Teams sidebar for section headers and add missing names">
+            Detect sections from Teams
+          </button>
+        </div>
+        <div class="section-gradient-row">
+          <label class="gradient-label">
+            <span class="gradient-label-text">Primary</span>
+            <input type="color" id="sectionGradientPrimary" value="#6264a7" title="Hue and saturation anchor for the gradient" />
+          </label>
+          <button type="button" id="applySectionGradientBtn" class="section-gradient-btn" title="First section = darker, last = lighter (HSL lightness from primary hue)">
+            Apply gradient to sections
+          </button>
+        </div>
+        <div class="section-presets-row">
+          <span class="section-presets-label">Quick themes</span>
+          <div class="section-presets" id="sectionColorPresets" role="group" aria-label="Pre-made color themes"></div>
+        </div>
+      </div>
+
+      <!-- Chat Bubbles -->
+      <label class="toggle-row">
+        <div class="label-group">
+          <span class="label-title">Rounded Bubbles</span>
+          <span class="label-desc">Softer chat bubble corners &amp; shadow</span>
+        </div>
+        <input type="checkbox" id="bubbles" />
+        <span class="switch"></span>
+      </label>
+
+      <!-- Enhanced Readability -->
+      <label class="toggle-row">
+        <div class="label-group">
+          <span class="label-title">Enhanced Readability</span>
+          <span class="label-desc">Larger text &amp; better line spacing</span>
+        </div>
+        <input type="checkbox" id="readability" />
+        <span class="switch"></span>
+      </label>
+
+      <!-- Font Size (sub-option) -->
+      <div class="sub-option" id="fontSizeGroup">
+        <label class="range-row">
+          <span class="range-label">Font Size</span>
+          <input type="range" id="fontSize" min="12" max="20" step="1" value="14" />
+          <span class="range-value" id="fontSizeValue">14px</span>
+        </label>
+      </div>
+
+      <!-- Accent Color -->
+      <label class="toggle-row">
+        <div class="label-group">
+          <span class="label-title">Custom Accent</span>
+          <span class="label-desc">Change the brand / highlight color</span>
+        </div>
+        <input type="checkbox" id="accent" />
+        <span class="switch"></span>
+      </label>
+
+      <div class="sub-option" id="accentColorGroup">
+        <label class="color-row">
+          <span class="range-label">Color</span>
+          <div class="color-presets" id="colorPresets">
+            <button class="color-dot" data-color="#6264a7" style="background:#6264a7" title="Teams Purple"></button>
+            <button class="color-dot" data-color="#0078d4" style="background:#0078d4" title="Blue"></button>
+            <button class="color-dot" data-color="#00a36c" style="background:#00a36c" title="Green"></button>
+            <button class="color-dot" data-color="#e74c3c" style="background:#e74c3c" title="Red"></button>
+            <button class="color-dot" data-color="#f39c12" style="background:#f39c12" title="Orange"></button>
+            <button class="color-dot" data-color="#9b59b6" style="background:#9b59b6" title="Purple"></button>
+            <button class="color-dot" data-color="#e91e8c" style="background:#e91e8c" title="Pink"></button>
+          </div>
+          <input type="color" id="accentColor" value="#6264a7" />
+        </label>
+      </div>
+
+      <!-- Smooth Animations -->
+      <label class="toggle-row">
+        <div class="label-group">
+          <span class="label-title">Smooth Transitions</span>
+          <span class="label-desc">Add subtle transition animations</span>
+        </div>
+        <input type="checkbox" id="smooth" />
+        <span class="switch"></span>
+      </label>
+
+      <!-- Declutter -->
+      <label class="toggle-row">
+        <div class="label-group">
+          <span class="label-title">Declutter UI</span>
+          <span class="label-desc">Hide banners, meet button &amp; extras</span>
+        </div>
+        <input type="checkbox" id="declutter" />
+        <span class="switch"></span>
+      </label>
+
+      <!-- Narrow Sidebar -->
+      <label class="toggle-row">
+        <div class="label-group">
+          <span class="label-title">Narrow Sidebar</span>
+          <span class="label-desc">Collapse left rail to icon-only</span>
+        </div>
+        <input type="checkbox" id="narrowsidebar" />
+        <span class="switch"></span>
+      </label>
+
+      <!-- Unread Highlight -->
+      <label class="toggle-row toggle-row--unread" for="unreadhighlight">
+        <div class="label-group">
+          <span class="label-title">Unread Highlight</span>
+          <span class="label-desc">Make unread conversations stand out</span>
+        </div>
+        <div class="unread-inline-options" id="unreadInlineOptions">
+          <span class="color-clearable">
+            <input type="color" id="unreadColor" value="#6264a7" title="Text color" />
+            <button type="button" class="color-clear-btn" data-target="unreadColor" title="Use default">&#x2715;</button>
+          </span>
+          <span class="color-clearable">
+            <input type="color" id="unreadBgColor" value="#6264a7" title="Highlight color" />
+            <button type="button" class="color-clear-btn" data-target="unreadBgColor" title="Use default">&#x2715;</button>
+          </span>
+          <div class="emoji-picker-wrapper">
+            <button type="button" id="emojiPickerBtn" class="emoji-picker-btn" title="Pick an emoji"></button>
+            <div class="emoji-picker-dropdown" id="emojiPickerDropdown"></div>
+          </div>
+        </div>
+        <input type="checkbox" id="unreadhighlight" />
+        <span class="switch"></span>
+      </label>
+
+      <div class="pinned-emoji-row" id="pinnedEmojiRow">
+        <div class="label-group">
+          <span class="label-title">Pinned chat emoji</span>
+          <span class="label-desc">Prefix for pinned rows in Teams (side panel shows pinned names)</span>
+        </div>
+        <div class="emoji-picker-wrapper">
+          <button type="button" id="pinnedEmojiPickerBtn" class="emoji-picker-btn" title="Pick an emoji for pinned chats"></button>
+          <div class="emoji-picker-dropdown" id="pinnedEmojiPickerDropdown"></div>
+        </div>
+      </div>
+
+      <!-- Active Chat Color -->
+      <label class="toggle-row toggle-row--activechat" for="activechat">
+        <div class="label-group">
+          <span class="label-title">Active Chat Color</span>
+          <span class="label-desc">Highlight the currently selected chat</span>
+        </div>
+        <div class="activechat-inline-options" id="activeChatInlineOptions">
+          <span class="color-clearable">
+            <input type="color" id="activeChatColor" value="#6264a7" title="Text color" />
+            <button type="button" class="color-clear-btn" data-target="activeChatColor" title="Use default">&#x2715;</button>
+          </span>
+          <span class="color-clearable">
+            <input type="color" id="activeChatBgColor" value="#6264a7" title="Background color" />
+            <button type="button" class="color-clear-btn" data-target="activeChatBgColor" title="Use default">&#x2715;</button>
+          </span>
+          <div class="emoji-picker-wrapper">
+            <button type="button" id="activeChatEmojiPickerBtn" class="emoji-picker-btn" title="Pick an emoji for the active chat row"></button>
+            <div class="emoji-picker-dropdown" id="activeChatEmojiPickerDropdown"></div>
+          </div>
+        </div>
+        <input type="checkbox" id="activechat" />
+        <span class="switch"></span>
+      </label>
+
+      <!-- Custom Font -->
+      <label class="toggle-row">
+        <div class="label-group">
+          <span class="label-title">Custom Font</span>
+          <span class="label-desc">Override the default typeface (includes Linux-style monospace stacks)</span>
+        </div>
+        <input type="checkbox" id="customfont" />
+        <span class="switch"></span>
+      </label>
+
+      <div class="sub-option" id="fontFamilyGroup">
+        <label class="select-row">
+          <span class="range-label">Font</span>
+          <select id="fontFamily">
+            <option value="Segoe UI">Segoe UI</option>
+            <option value="Inter">Inter</option>
+            <option value="Roboto">Roboto</option>
+            <option value="Consolas, &quot;Cascadia Mono&quot;, &quot;Cascadia Code&quot;, &quot;Courier New&quot;, monospace">Terminal / Matrix</option>
+            <option value="&quot;JetBrains Mono&quot;, &quot;Fira Code&quot;, &quot;Ubuntu Mono&quot;, &quot;DejaVu Sans Mono&quot;, &quot;Liberation Mono&quot;, &quot;Noto Sans Mono&quot;, ui-monospace, monospace">Linux terminal</option>
+            <option value="Cascadia Code">Cascadia Code</option>
+            <option value="Fira Sans">Fira Sans</option>
+            <option value="Source Sans Pro">Source Sans Pro</option>
+            <option value="system-ui">System Default</option>
+          </select>
+        </label>
+      </div>
+
+      <label class="toggle-row">
+        <div class="label-group">
+          <span class="label-title">Custom Background</span>
+          <span class="label-desc">Wallpaper from your PC — stored only in this browser</span>
+        </div>
+        <input type="checkbox" id="custombackground" />
+        <span class="switch"></span>
+      </label>
+      <div class="sub-option" id="customBackgroundGroup">
+        <div class="bg-image-row">
+          <label class="bg-image-file-wrap">
+            <span class="bg-image-file-label">Choose image</span>
+            <input type="file" id="backgroundImageFile" accept="image/*" class="bg-image-file" />
+          </label>
+          <button type="button" id="clearBackgroundImageBtn" class="section-detect-btn">Remove image</button>
+        </div>
+        <p class="bg-image-meta" id="backgroundImageMeta"></p>
+        <p class="bg-image-hint">PNG, JPEG, WebP, or GIF — max 4 MB. Saved in extension local storage on this device (not synced to other computers).</p>
+        <div class="bg-tint-block">
+          <label class="bg-tint-toggle">
+            <input type="checkbox" id="customBackgroundTint" />
+            <span>Readability overlay</span>
+          </label>
+          <p class="bg-tint-hint">Semi-transparent color on top of the wallpaper (synced with your account)</p>
+          <div class="bg-tint-controls" id="customBackgroundTintGroup">
+            <label class="select-row bg-tint-color-row">
+              <span class="range-label">Tint color</span>
+              <input type="color" id="customBackgroundTintColor" class="bg-tint-color" />
+            </label>
+            <label class="select-row bg-tint-slider-row">
+              <span class="range-label">Opacity</span>
+              <input type="range" id="customBackgroundTintOpacity" min="0" max="100" step="1" class="bg-tint-range" />
+              <span class="bg-tint-opacity-value" id="customBackgroundTintOpacityValue">45%</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <button id="openUnreadBtn" class="open-unread-btn" title="Open Teams showing only unread conversations">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 12h-6l-2 3h-4l-2-3H2"/>
+          <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
+        </svg>
+        Unread Only
+      </button>
+      <button id="resetBtn" class="reset-btn">Reset All</button>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

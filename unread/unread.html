@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TeamTweaker — Unread</title>
+  <link rel="stylesheet" href="unread.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="header">
+      <div class="logo">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+          <rect x="2" y="2" width="20" height="20" rx="4" fill="#6264a7" />
+          <path d="M7 12h10M12 7v10" stroke="#fff" stroke-width="2.2" stroke-linecap="round" />
+        </svg>
+        <div class="header-text">
+          <h1>Unread Conversations</h1>
+          <span class="unread-count" id="unreadCount"></span>
+        </div>
+      </div>
+      <button id="refreshBtn" class="refresh-btn" title="Refresh">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 4 23 10 17 10"/>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+        </svg>
+      </button>
+    </header>
+
+    <main id="content" class="content">
+      <div class="status" id="status">
+        <div class="spinner"></div>
+        <p>Looking for Teams…</p>
+      </div>
+    </main>
+  </div>
+
+  <script src="unread.js"></script>
+</body>
+</html>
