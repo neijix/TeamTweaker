@@ -223,6 +223,12 @@ html.tf-customfont .fui-ChatMessage *:not(svg):not(svg *) {
   font-family: var(--tf-font-family, "Segoe UI", system-ui, sans-serif) !important;
 }
 
+/* Some outgoing/self messages use message body nodes with stronger Teams font rules. */
+html.tf-customfont [data-tid="messageBodyContent"],
+html.tf-customfont [data-tid="messageBodyContent"] *:not(svg):not(svg *) {
+  font-family: var(--tf-font-family, "Segoe UI", system-ui, sans-serif) !important;
+}
+
 /* -----------------------------------------------------------
    10. UNREAD HIGHLIGHT
    Target: conversation rows in the left-rail tree that contain
@@ -233,10 +239,12 @@ html.tf-customfont .fui-ChatMessage *:not(svg):not(svg *) {
 
 /* Bold the row that directly owns the unread badge.
    Use :has(> ...) or scope carefully so nested TreeItems
-   (other chats in the same group) are NOT colored. */
+   (other chats in the same group) are NOT colored.
+   Section headers own a direct [role="group"] child; :has([data-tid="unread"])
+   would still match them when any descendant chat is unread — exclude those. */
 html.tf-unreadhighlight
   [data-tid="simple-collab-dnd-rail"]
-  .fui-TreeItem:has([data-tid="unread"]) {
+  .fui-TreeItem:has([data-tid="unread"]):not(:has(> [role="group"])):not([data-tf-section]) {
   font-weight: 700 !important;
 }
 
@@ -245,10 +253,12 @@ html.tf-unreadhighlight
    We target all descendants (*) then undo it for nested TreeItems. */
 html.tf-unreadhighlight
   [data-tid="simple-collab-dnd-rail"]
-  .fui-TreeItem:has([data-tid="unread"]) > *:not([role="group"]) *,
+  .fui-TreeItem:has([data-tid="unread"]):not(:has(> [role="group"])):not([data-tf-section])
+  > *:not([role="group"]) *,
 html.tf-unreadhighlight
   [data-tid="simple-collab-dnd-rail"]
-  .fui-TreeItem:has([data-tid="unread"]) > *:not([role="group"]) {
+  .fui-TreeItem:has([data-tid="unread"]):not(:has(> [role="group"])):not([data-tf-section])
+  > *:not([role="group"]) {
   color: var(--tf-unread-color, #6264a7) !important;
   font-weight: 700 !important;
   background-color: var(--tf-unread-highlight, transparent) !important;
@@ -258,7 +268,7 @@ html.tf-unreadhighlight
 /* Make the unread count badge text match the chosen color */
 html.tf-unreadhighlight
   [data-tid="simple-collab-dnd-rail"]
-  .fui-TreeItem:has([data-tid="unread"])
+  .fui-TreeItem:has([data-tid="unread"]):not(:has(> [role="group"])):not([data-tf-section])
   [data-tid="unread"] {
   color: var(--tf-unread-color, #6264a7) !important;
   font-weight: 700 !important;

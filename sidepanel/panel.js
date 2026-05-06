@@ -13,7 +13,37 @@ function initTabs() {
       const target = btn.dataset.tab;
       for (const b of btns) b.classList.toggle("active", b === btn);
       for (const v of views) v.classList.toggle("active", v.id === "view-" + target);
+      if (target === "unread") {
+        startAutoRefresh();
+      } else {
+        stopAutoRefresh();
+      }
     });
+  }
+}
+
+function startAutoRefresh() {
+  stopAutoRefresh();
+  _autoRefreshTimer = setInterval(silentRefreshUnread, AUTO_REFRESH_INTERVAL_MS);
+}
+
+function stopAutoRefresh() {
+  if (_autoRefreshTimer) {
+    clearInterval(_autoRefreshTimer);
+    _autoRefreshTimer = null;
+  }
+}
+
+async function silentRefreshUnread() {
+  if (!_teamsTabId) return;
+  try {
+    const conversations = await scrapeUnreadFromTab(_teamsTabId);
+    const json = JSON.stringify(conversations);
+    if (json === _lastConversationsJSON) return;
+    _lastConversationsJSON = json;
+    renderConversations(conversations);
+  } catch {
+    // ignore silently — Teams tab may be loading
   }
 }
 
@@ -29,18 +59,28 @@ const TEAMS_URLS = [
 let _teamsTabId = null;
 let _sectionColors = {};
 let _pinnedConversations = [];
+let _lastConversationsJSON = null;
+let _autoRefreshTimer = null;
+const AUTO_REFRESH_INTERVAL_MS = 5000;
 
 function showStatus(html) {
   const el = document.getElementById("unreadContent");
   el.innerHTML = `<div class="status">${html}</div>`;
 }
 
-function findTeamsTab() {
-  return new Promise((resolve) => {
-    chrome.tabs.query({ url: TEAMS_URLS }, (tabs) => {
-      resolve(tabs && tabs.length > 0 ? tabs[0] : null);
-    });
-  });
+async function findTeamsTab() {
+  const tabs = await chrome.tabs.query({ url: TEAMS_URLS });
+  if (!tabs || tabs.length === 0) return null;
+  if (tabs.length === 1) return tabs[0];
+  // Prefer a tab in the current window (the one the side panel is attached to)
+  try {
+    const currentWindow = await chrome.windows.getCurrent();
+    const sameWindow = tabs.find((t) => t.windowId === currentWindow.id);
+    if (sameWindow) return sameWindow;
+  } catch {
+    /* fall through */
+  }
+  return tabs[0];
 }
 
 /** Section headers = tree rows with aria-expanded or a direct [role="group"] child (same as unread leaf filter, inverted). */
@@ -868,9 +908,13 @@ async function navigateToConversation(name, li) {
   if (!_teamsTabId) return;
   li.classList.add("navigating");
   try {
-    chrome.tabs.update(_teamsTabId, { active: true });
+    const tab = await chrome.tabs.get(_teamsTabId);
+    await chrome.windows.update(tab.windowId, { focused: true });
+    await chrome.tabs.update(_teamsTabId, { active: true });
     await clickConversationInTab(_teamsTabId, name);
     await highlightUnreadMessages(_teamsTabId);
+    // After navigation, refresh the list so the read conversation disappears
+    setTimeout(() => silentRefreshUnread(), 2000);
   } catch {
     // Teams tab may have closed
   } finally {
@@ -901,6 +945,7 @@ async function loadUnread() {
 
   try {
     const conversations = await scrapeUnreadFromTab(tab.id);
+    _lastConversationsJSON = JSON.stringify(conversations);
     renderConversations(conversations);
     renderPinnedSection();
   } catch (err) {
@@ -1585,8 +1630,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   initSettings();
   _pinnedConversations = await loadPinnedConversations();
   renderPinnedSection();
-  loadUnread();
-  document.getElementById("refreshBtn").addEventListener("click", () => loadUnread());
+  loadUnread().then(() => startAutoRefresh());
+  document.getElementById("refreshBtn").addEventListener("click", () => loadUnread().then(() => startAutoRefresh()));
 
   const closeSidePanelBtn = document.getElementById("closeSidePanelBtn");
   if (closeSidePanelBtn) {

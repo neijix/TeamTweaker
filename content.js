@@ -441,6 +441,7 @@ function applyUnreadEmoji(settings) {
   );
 
   for (const row of rows) {
+    if (!isLeafConversationRow(row)) continue;
     const nameEl = findConversationNameElement(row);
     if (!nameEl || nameEl.querySelector(`.${UNREAD_EMOJI_CLASS}`)) continue;
     insertEmojiAfterPriorMarkers(nameEl, UNREAD_EMOJI_CLASS, emoji, [PINNED_EMOJI_CLASS]);
@@ -752,6 +753,14 @@ function scoreSectionMatch(sourceEl, targetEl) {
   // those are nav icons, not section content headers.
   if (_cachedAppBar && _cachedAppBar.contains(targetEl)) score -= 150;
 
+  // Penalise leaf tree items that lack aria-expanded — those are conversation
+  // rows, not section headers, and should never be the winning target.
+  if (
+    targetEl.matches(".fui-TreeItem[role=\"treeitem\"]")
+    && !targetEl.hasAttribute("aria-expanded")
+    && !targetEl.querySelector(":scope > [role=\"group\"]")
+  ) score -= 500;
+
   return score;
 }
 
@@ -937,6 +946,15 @@ function applySectionColors(settings, forceRescan) {
 
     const targetEl = findSectionColorTarget(sourceEl);
     if (!targetEl) continue;
+
+    // Never color a leaf conversation row as a section header.
+    // Section headers always have aria-expanded (collapsible) or a direct
+    // [role="group"] child. A plain .fui-TreeItem without those is a chat row.
+    if (
+      targetEl.matches(".fui-TreeItem[role=\"treeitem\"]")
+      && !targetEl.hasAttribute("aria-expanded")
+      && !targetEl.querySelector(":scope > [role=\"group\"]")
+    ) continue;
 
     const candidateScore = scoreSectionMatch(sourceEl, targetEl);
     const current = desiredTargets.get(match.safeId);

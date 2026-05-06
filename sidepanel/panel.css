@@ -280,7 +280,8 @@ body {
   justify-content: space-between;
   gap: 10px;
   padding: 10px 14px;
-  background: var(--bg2);
+  background: var(--bg2) !important;
+  color: var(--fg);
   border-bottom: 1px solid var(--border);
   cursor: pointer;
   transition: background 0.15s, transform 0.1s;
@@ -291,7 +292,7 @@ body {
 }
 
 .conversation-item:hover {
-  background: var(--bg3);
+  background: var(--bg3) !important;
 }
 
 .conversation-item:active {
@@ -299,7 +300,7 @@ body {
 }
 
 .conversation-item.navigating {
-  background: var(--bg3);
+  background: var(--bg3) !important;
   opacity: 0.7;
 }
 
@@ -307,6 +308,16 @@ body {
   border: 1px solid var(--border);
   border-radius: 8px;
   margin-bottom: 6px;
+}
+
+.conversation-item .conv-name,
+.conversation-item .conv-sender {
+  color: var(--fg);
+}
+
+.conversation-item .conv-preview,
+.conversation-item .conv-time {
+  color: var(--fg2);
 }
 
 .conv-group:not(:has(.conv-group-header)) .conversation-item:hover {
