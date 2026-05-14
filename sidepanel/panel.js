@@ -38,10 +38,19 @@ async function silentRefreshUnread() {
   if (!_teamsTabId) return;
   try {
     const conversations = await scrapeUnreadFromTab(_teamsTabId);
-    const json = JSON.stringify(conversations);
+    // If the user is still viewing a conversation that Teams already marked read,
+    // keep it in the list until they navigate to a different conversation.
+    let merged = conversations;
+    if (_currentlyViewing) {
+      const stillPresent = conversations.some((c) => c.name === _currentlyViewing.name);
+      if (!stillPresent) {
+        merged = [{ ..._currentlyViewing.conv, _viewing: true }, ...conversations];
+      }
+    }
+    const json = JSON.stringify(merged);
     if (json === _lastConversationsJSON) return;
     _lastConversationsJSON = json;
-    renderConversations(conversations);
+    renderConversations(merged);
   } catch {
     // ignore silently — Teams tab may be loading
   }
@@ -61,6 +70,7 @@ let _sectionColors = {};
 let _pinnedConversations = [];
 let _lastConversationsJSON = null;
 let _autoRefreshTimer = null;
+let _currentlyViewing = null; // { name, conv } — kept in list until user navigates elsewhere
 const AUTO_REFRESH_INTERVAL_MS = 5000;
 
 function showStatus(html) {
@@ -597,14 +607,10 @@ async function clickConversationInTab(tabId, targetName) {
     target: { tabId },
     func: (nameToFind) => {
       const normalized = nameToFind.toLowerCase().trim();
-      const rail = document.querySelector('[data-tid="simple-collab-dnd-rail"]');
-      if (!rail) return false;
 
-      const rows = rail.querySelectorAll('.fui-TreeItem[role="treeitem"]');
-      for (const row of rows) {
-        if (row.hasAttribute("aria-expanded")) continue;
-        if (row.querySelector(":scope > [role=\"group\"]")) continue;
-
+      function matchRow(row) {
+        if (row.hasAttribute("aria-expanded")) return false;
+        if (row.querySelector(":scope > [role=\"group\"]")) return false;
         for (const el of row.querySelectorAll("span, div")) {
           if (el.matches('[data-tid="unread"]') || el.closest('[data-tid="unread"]')) continue;
           let dt = "";
@@ -614,12 +620,36 @@ async function clickConversationInTab(tabId, targetName) {
           dt = dt.trim()
             .replace(/^\s*[\p{Emoji_Presentation}\p{Extended_Pictographic}]\s*/u, "")
             .trim().toLowerCase();
-          if (dt === normalized) {
-            const target = row.querySelector("a, button, [role=\"button\"]") || el;
-            target.click();
-            return true;
-          }
+          if (dt === normalized) return true;
         }
+        return false;
+      }
+
+      function tryClick(rail) {
+        const rows = rail.querySelectorAll('.fui-TreeItem[role="treeitem"]');
+        for (const row of rows) {
+          if (!matchRow(row)) continue;
+          // Scroll into view first so Teams doesn't virtualize it away
+          row.scrollIntoView({ block: "nearest" });
+          // Click the row itself; fall back to first interactive child
+          const target = row.querySelector("a, button, [role=\"button\"]") || row;
+          target.click();
+          return true;
+        }
+        return false;
+      }
+
+      const rail = document.querySelector('[data-tid="simple-collab-dnd-rail"]');
+      if (rail && tryClick(rail)) return true;
+
+      // Fallback: search whole document in case Teams restructured the rail
+      const allRows = document.querySelectorAll('.fui-TreeItem[role="treeitem"]');
+      for (const row of allRows) {
+        if (!matchRow(row)) continue;
+        row.scrollIntoView({ block: "nearest" });
+        const target = row.querySelector("a, button, [role=\"button\"]") || row;
+        target.click();
+        return true;
       }
       return false;
     },
@@ -767,7 +797,7 @@ function renderPinnedSection() {
 
       li.appendChild(createPinButton(pinned.name));
 
-      li.addEventListener("click", () => navigateToConversation(pinned.name, li));
+      li.addEventListener("click", () => navigateToConversation({ name: pinned.name }, li));
       list.appendChild(li);
     }
   });
@@ -843,6 +873,7 @@ function renderConversations(conversations) {
 function buildConversationItem(conv) {
   const li = document.createElement("li");
   li.className = "conversation-item";
+  if (conv._viewing) li.classList.add("viewing");
   li.title = conv.name;
 
   const left = document.createElement("div");
@@ -889,7 +920,7 @@ function buildConversationItem(conv) {
 
   li.appendChild(createPinButton(conv.name));
 
-  li.addEventListener("click", () => navigateToConversation(conv.name, li));
+  li.addEventListener("click", () => navigateToConversation(conv, li));
   return li;
 }
 
@@ -904,17 +935,29 @@ function updateTabBadge(count) {
   }
 }
 
-async function navigateToConversation(name, li) {
+async function navigateToConversation(conv, li) {
   if (!_teamsTabId) return;
+  // Switching to a different conversation clears the previous "viewing" hold
+  if (_currentlyViewing && _currentlyViewing.name !== conv.name) {
+    _currentlyViewing = null;
+  }
+  _currentlyViewing = { name: conv.name, conv };
   li.classList.add("navigating");
   try {
     const tab = await chrome.tabs.get(_teamsTabId);
     await chrome.windows.update(tab.windowId, { focused: true });
     await chrome.tabs.update(_teamsTabId, { active: true });
-    await clickConversationInTab(_teamsTabId, name);
+    // Wait for the tab to become active and interactive before injecting the click
+    await new Promise((resolve) => setTimeout(resolve, 150));
+    const clicked = await clickConversationInTab(_teamsTabId, conv.name);
+    // If the first attempt missed (e.g. tab was still loading), retry once
+    if (!clicked) {
+      await new Promise((resolve) => setTimeout(resolve, 400));
+      await clickConversationInTab(_teamsTabId, conv.name);
+    }
     await highlightUnreadMessages(_teamsTabId);
-    // After navigation, refresh the list so the read conversation disappears
-    setTimeout(() => silentRefreshUnread(), 2000);
+    // Do NOT refresh immediately — the conversation stays in the list until the
+    // user navigates to a different conversation (which clears _currentlyViewing).
   } catch {
     // Teams tab may have closed
   } finally {

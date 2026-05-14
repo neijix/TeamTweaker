@@ -1,11 +1,20 @@
 ﻿{
   "manifest_version": 3,
   "name": "TeamTweaker",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Modify and improve the appearance of Microsoft Teams in your browser.",
-  "permissions": ["storage", "activeTab", "tabs", "scripting", "sidePanel"],
+  "permissions": ["storage", "activeTab", "tabs", "scripting"],
   "side_panel": {
     "default_path": "sidepanel/panel.html"
+  },
+  "sidebar_action": {
+    "default_panel": "sidepanel/panel.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_title": "TeamTweaker"
   },
   "host_permissions": [
     "https://teams.microsoft.com/*",
@@ -27,6 +36,7 @@
     "service_worker": "background.js"
   },
   "action": {
+    "default_popup": "popup/popup.html",
     "default_icon": {
       "16": "icons/icon16.png",
       "48": "icons/icon48.png",

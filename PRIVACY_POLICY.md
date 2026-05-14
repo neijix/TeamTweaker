@@ -39,4 +39,4 @@ TeamTweaker runs only on:
 
 ## Contact
 
-For privacy questions, contact: **[your publisher contact email]**
+For privacy questions, contact: **neijix@gmail.com**

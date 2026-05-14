@@ -304,6 +304,11 @@ body {
   opacity: 0.7;
 }
 
+.conversation-item.viewing {
+  opacity: 0.45;
+  border-left: 2px solid var(--accent);
+}
+
 .conv-group:not(:has(.conv-group-header)) .conversation-item {
   border: 1px solid var(--border);
   border-radius: 8px;
