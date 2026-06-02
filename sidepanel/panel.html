@@ -17,7 +17,15 @@
             <path d="M7 12h10M12 7v10" stroke="#fff" stroke-width="2.2" stroke-linecap="round" />
           </svg>
           <span class="panel-title">TeamTweaker</span>
+          <span class="panel-version" id="headerVersion"></span>
         </div>
+        <button type="button" id="openTeamsBtn" class="panel-open-teams-btn" title="Open Microsoft Teams">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+            <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+          </svg>
+          Teams
+        </button>
         <button type="button" id="closeSidePanelBtn" class="panel-close-btn" title="Close this side panel (Chrome 141+). You can also use the browser side-panel icon.">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
@@ -73,7 +81,23 @@
 
     <!-- ==================== SETTINGS TAB ==================== -->
     <div class="tab-view" id="view-settings">
-      <main class="settings-content">
+
+      <!-- Shown when no sync folder is configured yet -->
+      <div id="syncFolderGate" class="sync-folder-gate" style="display:none">
+        <div class="sync-folder-gate-card">
+          <svg class="sync-folder-gate-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+          </svg>
+          <h2 class="sync-folder-gate-title">Choose a Sync Folder</h2>
+          <p class="sync-folder-gate-desc">
+            TeamTweaker saves your settings to a folder you choose — a shared drive, a USB stick, or any local path.
+            All your settings sync automatically from there.
+          </p>
+          <button type="button" id="syncFolderGateBtn" class="sync-folder-gate-btn">Select Folder…</button>
+        </div>
+      </div>
+
+      <main class="settings-content" id="settingsContent">
         <!-- Section Colors -->
         <label class="toggle-row">
           <div class="label-group">
@@ -342,7 +366,15 @@
           </label>
           <button id="resetBtn" class="reset-btn">Reset All</button>
         </div>
+
       </main>
+
+      <div class="version-footer">
+        <span class="version-text" id="versionText"></span>
+        <button type="button" id="checkUpdateBtn" class="version-update-btn" title="Check for a newer version on the Chrome Web Store">Check for updates</button>
+        <button type="button" id="reloadExtensionBtn" class="version-update-btn" title="Reload the extension">Reload</button>
+        <span class="version-update-msg" id="updateMsg"></span>
+      </div>
     </div>
   </div>
 

@@ -1422,6 +1422,43 @@ function initSettings() {
     if (file) importConfig(file);
     e.target.value = "";
   });
+
+  // Version display
+  const { version } = chrome.runtime.getManifest();
+  const headerVersion = document.getElementById("headerVersion");
+  if (headerVersion) headerVersion.textContent = "v" + version;
+  const versionText = document.getElementById("versionText");
+  if (versionText) versionText.textContent = "v" + version;
+
+  document.getElementById("checkUpdateBtn").addEventListener("click", async () => {
+    const msgEl = document.getElementById("updateMsg");
+    const btn = document.getElementById("checkUpdateBtn");
+    btn.disabled = true;
+    msgEl.textContent = "Checking…";
+    msgEl.className = "version-update-msg";
+    try {
+      const result = await chrome.runtime.requestUpdateCheck();
+      const status = result.status ?? result; // Chrome 109+ returns object; older returns string
+      if (status === "update_available" || result.status === "update_available") {
+        msgEl.textContent = "Update available — restart your browser to apply.";
+        msgEl.className = "version-update-msg version-update-msg--available";
+      } else if (status === "throttled" || result.status === "throttled") {
+        msgEl.textContent = "Please wait a moment and try again.";
+        msgEl.className = "version-update-msg";
+      } else {
+        msgEl.textContent = "You're up to date.";
+        msgEl.className = "version-update-msg version-update-msg--ok";
+      }
+    } catch {
+      msgEl.textContent = "Check not available (unpacked extension or no network).";
+      msgEl.className = "version-update-msg";
+    }
+    btn.disabled = false;
+  });
+
+  document.getElementById("reloadExtensionBtn").addEventListener("click", () => {
+    chrome.runtime.reload();
+  });
 }
 
 function updateBackgroundTintControls() {
@@ -1821,9 +1858,15 @@ async function updateSyncFolderUI() {
   const reconnectBtn = document.getElementById("reconnectSyncFolderBtn");
   const clearBtn = document.getElementById("clearSyncFolderBtn");
   const setBtn = document.getElementById("setSyncFolderBtn");
+  const gate = document.getElementById("syncFolderGate");
+  const content = document.getElementById("settingsContent");
   if (!dot || !name) return;
 
-  if (!_syncFolderHandle) {
+  const hasFolder = !!_syncFolderHandle;
+  if (gate) gate.style.display = hasFolder ? "none" : "";
+  if (content) content.style.display = hasFolder ? "" : "none";
+
+  if (!hasFolder) {
     dot.className = "sync-folder-dot sync-folder-dot--off";
     dot.title = "Not configured";
     name.textContent = "No folder configured";
@@ -1883,6 +1926,18 @@ async function tryAutoLoadFromSyncFolder() {
 }
 
 async function initSyncFolder() {
+  // File System Access API is unavailable (e.g. Firefox < 111, some mobile browsers).
+  // Skip the gate entirely and hide the sync folder section so settings remain accessible.
+  if (typeof window.showDirectoryPicker !== "function") {
+    const gate = document.getElementById("syncFolderGate");
+    const content = document.getElementById("settingsContent");
+    const section = document.querySelector(".sync-folder-section");
+    if (gate) gate.style.display = "none";
+    if (content) content.style.display = "";
+    if (section) section.style.display = "none";
+    return;
+  }
+
   _syncFolderHandle = await loadSyncFolderHandle();
   await updateSyncFolderUI();
   await tryAutoLoadFromSyncFolder();
@@ -1892,7 +1947,7 @@ async function initSyncFolder() {
     if (area === "sync") scheduleSyncFolderWrite();
   });
 
-  document.getElementById("setSyncFolderBtn").addEventListener("click", async () => {
+  async function pickSyncFolder() {
     if (!window.showDirectoryPicker) {
       alert("TeamTweaker: your browser does not support the File System Access API.");
       return;
@@ -1909,13 +1964,15 @@ async function initSyncFolder() {
           window.location.reload();
         }
       } else {
-        // No file yet — write current settings there immediately
         await writeConfigToSyncFolder();
       }
     } catch (e) {
       if (e.name !== "AbortError") console.error("[TeamTweaker] setSyncFolder", e);
     }
-  });
+  }
+
+  document.getElementById("setSyncFolderBtn").addEventListener("click", pickSyncFolder);
+  document.getElementById("syncFolderGateBtn").addEventListener("click", pickSyncFolder);
 
   document.getElementById("reconnectSyncFolderBtn").addEventListener("click", async () => {
     const granted = await requestSyncFolderPermission();
@@ -2010,6 +2067,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   renderPinnedSection();
   loadUnread().then(() => startAutoRefresh());
   document.getElementById("refreshBtn").addEventListener("click", () => loadUnread().then(() => startAutoRefresh()));
+
+  const openTeamsBtn = document.getElementById("openTeamsBtn");
+  if (openTeamsBtn) {
+    openTeamsBtn.addEventListener("click", () => {
+      chrome.tabs.create({ url: "https://teams.microsoft.com/" });
+    });
+  }
 
   const closeSidePanelBtn = document.getElementById("closeSidePanelBtn");
   if (closeSidePanelBtn) {

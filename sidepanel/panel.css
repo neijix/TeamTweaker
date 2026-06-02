@@ -52,6 +52,29 @@ body {
   min-width: 0;
 }
 
+.panel-open-teams-btn {
+  flex-shrink: 0;
+  background: var(--accent);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: #fff;
+  height: 32px;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.15s;
+}
+
+.panel-open-teams-btn:hover {
+  opacity: 0.85;
+}
+
 .panel-close-btn {
   flex-shrink: 0;
   background: var(--bg3);
@@ -1152,6 +1175,66 @@ select:focus {
 
 /* Settings Footer */
 /* ============================================================
+   SYNC FOLDER GATE (setup screen when no folder configured)
+   ============================================================ */
+
+.sync-folder-gate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.sync-folder-gate-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  max-width: 280px;
+  text-align: center;
+}
+
+.sync-folder-gate-icon {
+  color: var(--accent);
+  opacity: 0.85;
+}
+
+.sync-folder-gate-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--fg1);
+}
+
+.sync-folder-gate-desc {
+  margin: 0;
+  font-size: 12px;
+  color: var(--fg2);
+  line-height: 1.5;
+}
+
+.sync-folder-gate-btn {
+  margin-top: 4px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 24px;
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.sync-folder-gate-btn:hover {
+  opacity: 0.85;
+}
+
+/* ============================================================
    SYNC FOLDER
    ============================================================ */
 
@@ -1262,6 +1345,61 @@ select:focus {
 .import-file-input {
   display: none;
 }
+
+.panel-version {
+  font-size: 10px;
+  color: var(--fg2);
+  font-variant-numeric: tabular-nums;
+  margin-left: 2px;
+  align-self: flex-end;
+  padding-bottom: 1px;
+}
+
+.version-text {
+  font-size: 11px;
+  color: var(--fg2);
+  font-variant-numeric: tabular-nums;
+  margin-right: 4px;
+}
+
+.version-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px 14px;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--border);
+}
+
+.version-update-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--fg2);
+  font-size: 11px;
+  font-family: inherit;
+  padding: 3px 10px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.version-update-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.version-update-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.version-update-msg {
+  font-size: 11px;
+  color: var(--fg2);
+}
+
+.version-update-msg--ok       { color: #2ecc71; }
+.version-update-msg--available { color: #f39c12; font-weight: 600; }
 
 /* ============================================================
    PIN / BOOKMARK FEATURE
