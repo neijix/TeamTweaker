@@ -1151,28 +1151,116 @@ select:focus {
 }
 
 /* Settings Footer */
+/* ============================================================
+   SYNC FOLDER
+   ============================================================ */
+
+.sync-folder-section {
+  margin: 4px 0 0;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+}
+
+.sync-folder-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+  color: var(--fg2);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sync-folder-label {
+  flex: 1;
+}
+
+.sync-folder-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.sync-folder-dot--on  { background: #2ecc71; }
+.sync-folder-dot--warn { background: #f39c12; }
+.sync-folder-dot--off { background: var(--border); }
+
+.sync-folder-name {
+  font-size: 12px;
+  color: var(--fg1);
+  margin-bottom: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sync-folder-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.sync-folder-hint {
+  margin: 8px 0 0;
+  font-size: 11px;
+  color: var(--fg2);
+  line-height: 1.4;
+}
+
+/* ============================================================
+   SETTINGS FOOTER
+   ============================================================ */
+
 .settings-footer {
   padding: 14px 16px;
   display: flex;
+  gap: 8px;
   justify-content: center;
+  flex-wrap: wrap;
 }
 
-.reset-btn {
+.reset-btn,
+.export-btn,
+.import-btn {
   background: var(--bg3);
   color: var(--fg2);
   border: 1px solid var(--border);
   border-radius: 6px;
-  padding: 6px 20px;
+  padding: 6px 14px;
   font-size: 12px;
   font-family: inherit;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
+  display: inline-block;
 }
 
 .reset-btn:hover {
   background: #e74c3c;
   color: #fff;
   border-color: #e74c3c;
+}
+
+.export-btn:hover {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.import-btn-wrap {
+  cursor: pointer;
+}
+
+.import-btn-wrap:hover .import-btn {
+  background: #2e7d32;
+  color: #fff;
+  border-color: #2e7d32;
+}
+
+.import-file-input {
+  display: none;
 }
 
 /* ============================================================

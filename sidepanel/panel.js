@@ -1414,6 +1414,14 @@ function initSettings() {
       });
     });
   });
+
+  document.getElementById("exportConfigBtn").addEventListener("click", exportConfig);
+
+  document.getElementById("importConfigFile").addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (file) importConfig(file);
+    e.target.value = "";
+  });
 }
 
 function updateBackgroundTintControls() {
@@ -1665,12 +1673,339 @@ function updateClearedState(pickerId, value) {
 }
 
 // ============================================================
+//  SYNC FOLDER (File System Access API + IndexedDB handle store)
+// ============================================================
+
+const HANDLE_DB_NAME = "teamtweaker-handles";
+const HANDLE_DB_KEY = "syncFolder";
+
+let _syncFolderHandle = null;
+let _syncFolderWriteTimer = null;
+
+function openHandleDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(HANDLE_DB_NAME, 1);
+    req.onupgradeneeded = (e) => {
+      e.target.result.createObjectStore("handles");
+    };
+    req.onsuccess = (e) => resolve(e.target.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function saveSyncFolderHandle(handle) {
+  const db = await openHandleDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction("handles", "readwrite");
+    tx.objectStore("handles").put(handle, HANDLE_DB_KEY);
+    tx.oncomplete = resolve;
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function loadSyncFolderHandle() {
+  try {
+    const db = await openHandleDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction("handles", "readonly");
+      const req = tx.objectStore("handles").get(HANDLE_DB_KEY);
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => reject(req.error);
+    });
+  } catch {
+    return null;
+  }
+}
+
+async function deleteSyncFolderHandle() {
+  const db = await openHandleDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction("handles", "readwrite");
+    tx.objectStore("handles").delete(HANDLE_DB_KEY);
+    tx.oncomplete = resolve;
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function getSyncFolderPermission() {
+  if (!_syncFolderHandle) return "unavailable";
+  try {
+    return await _syncFolderHandle.queryPermission({ mode: "readwrite" });
+  } catch {
+    return "unavailable";
+  }
+}
+
+async function requestSyncFolderPermission() {
+  if (!_syncFolderHandle) return false;
+  try {
+    return (await _syncFolderHandle.requestPermission({ mode: "readwrite" })) === "granted";
+  } catch {
+    return false;
+  }
+}
+
+async function readConfigFromSyncFolder() {
+  if (!_syncFolderHandle) return null;
+  try {
+    const fh = await _syncFolderHandle.getFileHandle("teamtweaker-config.json");
+    const file = await fh.getFile();
+    const config = JSON.parse(await file.text());
+    if (!config._teamtweaker || !config.sync) return null;
+    return config;
+  } catch {
+    return null;
+  }
+}
+
+async function writeConfigToSyncFolder() {
+  if (!_syncFolderHandle) return;
+  if (await getSyncFolderPermission() !== "granted") return;
+  return new Promise((resolve) => {
+    chrome.storage.sync.get(null, (syncData) => {
+      chrome.storage.local.get([TF_BACKGROUND_IMAGE_DATA_URL, TF_BACKGROUND_IMAGE_NAME], async (localData) => {
+        const config = {
+          _teamtweaker: true,
+          _version: 1,
+          _exportedAt: new Date().toISOString(),
+          sync: syncData,
+        };
+        if (localData[TF_BACKGROUND_IMAGE_DATA_URL]) {
+          config.local = {
+            [TF_BACKGROUND_IMAGE_DATA_URL]: localData[TF_BACKGROUND_IMAGE_DATA_URL],
+            [TF_BACKGROUND_IMAGE_NAME]: localData[TF_BACKGROUND_IMAGE_NAME] || "",
+          };
+        }
+        try {
+          const fh = await _syncFolderHandle.getFileHandle("teamtweaker-config.json", { create: true });
+          const writable = await fh.createWritable();
+          await writable.write(JSON.stringify(config, null, 2));
+          await writable.close();
+        } catch (e) {
+          console.warn("[TeamTweaker] writeConfigToSyncFolder failed", e);
+        }
+        resolve();
+      });
+    });
+  });
+}
+
+function scheduleSyncFolderWrite() {
+  if (_syncFolderWriteTimer) clearTimeout(_syncFolderWriteTimer);
+  _syncFolderWriteTimer = setTimeout(async () => {
+    _syncFolderWriteTimer = null;
+    await writeConfigToSyncFolder();
+  }, 1500);
+}
+
+async function applyConfigFromSyncFolder() {
+  const config = await readConfigFromSyncFolder();
+  if (!config) return false;
+  return new Promise((resolve) => {
+    chrome.storage.sync.set(config.sync, () => {
+      if (config.local && config.local[TF_BACKGROUND_IMAGE_DATA_URL]) {
+        chrome.storage.local.set({
+          [TF_BACKGROUND_IMAGE_DATA_URL]: config.local[TF_BACKGROUND_IMAGE_DATA_URL],
+          [TF_BACKGROUND_IMAGE_NAME]: config.local[TF_BACKGROUND_IMAGE_NAME] || "",
+        }, () => resolve(true));
+      } else {
+        resolve(true);
+      }
+    });
+  });
+}
+
+async function updateSyncFolderUI() {
+  const dot = document.getElementById("syncFolderDot");
+  const name = document.getElementById("syncFolderName");
+  const reconnectBtn = document.getElementById("reconnectSyncFolderBtn");
+  const clearBtn = document.getElementById("clearSyncFolderBtn");
+  const setBtn = document.getElementById("setSyncFolderBtn");
+  if (!dot || !name) return;
+
+  if (!_syncFolderHandle) {
+    dot.className = "sync-folder-dot sync-folder-dot--off";
+    dot.title = "Not configured";
+    name.textContent = "No folder configured";
+    reconnectBtn.style.display = "none";
+    clearBtn.style.display = "none";
+    setBtn.textContent = "Set folder…";
+    return;
+  }
+
+  name.textContent = _syncFolderHandle.name;
+  clearBtn.style.display = "";
+  setBtn.textContent = "Change…";
+  const perm = await getSyncFolderPermission();
+  if (perm === "granted") {
+    dot.className = "sync-folder-dot sync-folder-dot--on";
+    dot.title = "Connected — settings auto-save here";
+    reconnectBtn.style.display = "none";
+  } else if (perm === "prompt") {
+    dot.className = "sync-folder-dot sync-folder-dot--warn";
+    dot.title = "Permission needed — click Reconnect";
+    reconnectBtn.style.display = "";
+  } else {
+    dot.className = "sync-folder-dot sync-folder-dot--off";
+    dot.title = "Permission unavailable";
+    reconnectBtn.style.display = "";
+  }
+}
+
+async function tryAutoLoadFromSyncFolder() {
+  if (!_syncFolderHandle) return;
+  if (await getSyncFolderPermission() !== "granted") return;
+
+  // Use chrome.storage.session to prevent reload loops (persists across location.reload)
+  const session = await new Promise((res) => {
+    if (chrome.storage.session) {
+      chrome.storage.session.get("tf_sync_loaded_at", res);
+    } else {
+      res({});
+    }
+  });
+  if (session.tf_sync_loaded_at && Date.now() - session.tf_sync_loaded_at < 10000) return;
+
+  const config = await readConfigFromSyncFolder();
+  if (!config) return;
+
+  const setLoadedFlag = () => new Promise((res) => {
+    if (chrome.storage.session) {
+      chrome.storage.session.set({ tf_sync_loaded_at: Date.now() }, res);
+    } else {
+      res();
+    }
+  });
+
+  await setLoadedFlag();
+  await applyConfigFromSyncFolder();
+  window.location.reload();
+}
+
+async function initSyncFolder() {
+  _syncFolderHandle = await loadSyncFolderHandle();
+  await updateSyncFolderUI();
+  await tryAutoLoadFromSyncFolder();
+
+  // Auto-save to folder whenever sync storage changes
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === "sync") scheduleSyncFolderWrite();
+  });
+
+  document.getElementById("setSyncFolderBtn").addEventListener("click", async () => {
+    if (!window.showDirectoryPicker) {
+      alert("TeamTweaker: your browser does not support the File System Access API.");
+      return;
+    }
+    try {
+      const handle = await window.showDirectoryPicker({ mode: "readwrite" });
+      _syncFolderHandle = handle;
+      await saveSyncFolderHandle(handle);
+      await updateSyncFolderUI();
+      const config = await readConfigFromSyncFolder();
+      if (config) {
+        if (confirm("A TeamTweaker config file was found in this folder. Load it now?")) {
+          await applyConfigFromSyncFolder();
+          window.location.reload();
+        }
+      } else {
+        // No file yet — write current settings there immediately
+        await writeConfigToSyncFolder();
+      }
+    } catch (e) {
+      if (e.name !== "AbortError") console.error("[TeamTweaker] setSyncFolder", e);
+    }
+  });
+
+  document.getElementById("reconnectSyncFolderBtn").addEventListener("click", async () => {
+    const granted = await requestSyncFolderPermission();
+    if (granted) {
+      await applyConfigFromSyncFolder();
+      window.location.reload();
+    }
+    await updateSyncFolderUI();
+  });
+
+  document.getElementById("clearSyncFolderBtn").addEventListener("click", async () => {
+    if (!confirm("Stop syncing to this folder? Your settings will not be deleted.")) return;
+    await deleteSyncFolderHandle();
+    _syncFolderHandle = null;
+    await updateSyncFolderUI();
+  });
+}
+
+// ============================================================
+//  EXPORT / IMPORT CONFIG
+// ============================================================
+
+function exportConfig() {
+  chrome.storage.sync.get(null, (syncData) => {
+    chrome.storage.local.get([TF_BACKGROUND_IMAGE_DATA_URL, TF_BACKGROUND_IMAGE_NAME], (localData) => {
+      const config = {
+        _teamtweaker: true,
+        _version: 1,
+        _exportedAt: new Date().toISOString(),
+        sync: syncData,
+      };
+      if (localData[TF_BACKGROUND_IMAGE_DATA_URL]) {
+        config.local = {
+          [TF_BACKGROUND_IMAGE_DATA_URL]: localData[TF_BACKGROUND_IMAGE_DATA_URL],
+          [TF_BACKGROUND_IMAGE_NAME]: localData[TF_BACKGROUND_IMAGE_NAME] || "",
+        };
+      }
+      const json = JSON.stringify(config, null, 2);
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const date = new Date().toISOString().slice(0, 10);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "teamtweaker-config-" + date + ".json";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+  });
+}
+
+function importConfig(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    let config;
+    try {
+      config = JSON.parse(e.target.result);
+    } catch {
+      alert("TeamTweaker: invalid JSON file.");
+      return;
+    }
+    if (!config._teamtweaker || !config.sync) {
+      alert("TeamTweaker: this file does not look like a TeamTweaker config backup.");
+      return;
+    }
+    chrome.storage.sync.set(config.sync, () => {
+      if (config.local && config.local[TF_BACKGROUND_IMAGE_DATA_URL]) {
+        chrome.storage.local.set({
+          [TF_BACKGROUND_IMAGE_DATA_URL]: config.local[TF_BACKGROUND_IMAGE_DATA_URL],
+          [TF_BACKGROUND_IMAGE_NAME]: config.local[TF_BACKGROUND_IMAGE_NAME] || "",
+        }, () => {
+          window.location.reload();
+        });
+      } else {
+        window.location.reload();
+      }
+    });
+  };
+  reader.readAsText(file);
+}
+
+// ============================================================
 //  INIT
 // ============================================================
 
 document.addEventListener("DOMContentLoaded", async () => {
   initTabs();
   initSettings();
+  initSyncFolder();
   _pinnedConversations = await loadPinnedConversations();
   renderPinnedSection();
   loadUnread().then(() => startAutoRefresh());

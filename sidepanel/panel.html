@@ -316,7 +316,30 @@
           </div>
         </div>
 
+        <!-- Sync Folder -->
+        <div class="sync-folder-section">
+          <div class="sync-folder-header">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+            </svg>
+            <span class="sync-folder-label">Sync Folder</span>
+            <span class="sync-folder-dot" id="syncFolderDot" title=""></span>
+          </div>
+          <div class="sync-folder-name" id="syncFolderName">No folder configured</div>
+          <div class="sync-folder-actions">
+            <button type="button" id="setSyncFolderBtn" class="section-detect-btn">Set folder…</button>
+            <button type="button" id="reconnectSyncFolderBtn" class="section-detect-btn" style="display:none">Reconnect</button>
+            <button type="button" id="clearSyncFolderBtn" class="section-detect-btn" style="display:none">Clear</button>
+          </div>
+          <p class="sync-folder-hint">Choose a folder on your shared drive. Settings auto-save here and reload from it each time the panel opens.</p>
+        </div>
+
         <div class="settings-footer">
+          <button id="exportConfigBtn" class="export-btn" title="Download all settings as a JSON backup file">Export Config</button>
+          <label class="import-btn-wrap" title="Restore settings from a previously exported JSON file">
+            <span class="import-btn">Import Config</span>
+            <input type="file" id="importConfigFile" accept=".json" class="import-file-input" />
+          </label>
           <button id="resetBtn" class="reset-btn">Reset All</button>
         </div>
       </main>
