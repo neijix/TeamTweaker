@@ -1,0 +1,61 @@
+# TeamTweaker-Public â€” Windsurf Rules
+
+## Project Overview
+
+- Type: [Web App / API / Desktop App / DevOps / Data Science / etc.]
+- Language: [JavaScript/Python/C#/Java/etc.]
+- Framework: [React/Django/FastAPI/.NET/etc.]
+- Platform: [Windows / Linux / macOS / cross-platform]
+
+## Mandatory Reading
+
+Before making any changes, read these files in order:
+
+1. `.github/copilot-instructions.md` â€” full AI directives and post-task checklist
+2. `.github/PROJECT_STATE.md` â€” current state of the project
+3. `.github/KNOWLEDGE.md` â€” solutions, workarounds, and learned patterns
+
+These three files are the single source of truth. Do not duplicate their content.
+
+## Critical Rules
+
+1. After every change â†’ update `.github/PROJECT_STATE.md` (current state, not changelog)
+2. After learning something new â†’ add it to `.github/KNOWLEDGE.md`
+3. Validate JSON after editing `.json` files
+4. Never commit secrets, API keys, or tokens
+5. Follow existing patterns before creating new ones
+6. Error handling: always handle errors gracefully, never fail silently
+7. Prefer PowerShell syntax for automation scripts on Windows projects
+
+## Coding Conventions
+
+- Variables: [camelCase/snake_case/PascalCase]
+- Functions: [camelCase/snake_case]
+- Classes: [PascalCase]
+- Files: [kebab-case/snake_case/PascalCase]
+- Indentation: [2/4] spaces
+- Comments: explain WHY not WHAT
+
+## Post-Response Checklist â€” Checkpoint Policy
+
+Commit at the end of **every response** that modifies files â€” completed or in-progress.
+This allows any agent on any platform to resume: `git log --oneline` + `git diff HEAD`.
+
+1. Verify the change (syntax, lint, tests)
+2. Update `.github/PROJECT_STATE.md`
+3. Update `.github/KNOWLEDGE.md` if non-obvious solution was found
+4. **Commit** every response:
+   - Completed: `git add -A && git commit -m "feat(scope): description"`
+   - In-progress: `git add -A && git commit -m "wip(scope): step N/M â€” done; next: X"`
+5. Confirm briefly: what changed, which docs updated, commit hash
+
+## Key Commands
+
+- Development: `[start command]`
+- Build: `[build command]`
+- Test: `[test command]`
+- Lint: `[lint command]`
+
+## Notes
+
+- [Project-specific quirks or context]

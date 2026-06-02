@@ -37,9 +37,10 @@ chrome.runtime.onInstalled.addListener((details) => {
 });
 
 // Open the side panel when the extension icon is clicked.
-// Chrome/Edge: setPanelBehavior overrides the default_popup and opens the side panel instead.
+// Chrome/Edge: clear the default_popup (set in manifest for Opera fallback) and open the side panel instead.
 // Opera: sidePanel API is absent, so default_popup in manifest.json kicks in and opens the popup normally.
 if (chrome.sidePanel) {
+  chrome.action.setPopup({ popup: "" }).catch(() => {});
   chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(() => {});
 }
 

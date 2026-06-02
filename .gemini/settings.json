@@ -1,0 +1,29 @@
+{
+  "context": {
+    "fileName": "GEMINI.md"
+  },
+  "coreTools": {
+    "shell": true,
+    "readFile": true,
+    "writeFile": true,
+    "glob": true,
+    "grep": true,
+    "listDir": true
+  },
+  "autoApprove": true,
+  "watcher": {
+    "ignore": [
+      ".git/**",
+      "node_modules/**",
+      "dist/**",
+      "build/**",
+      "coverage/**",
+      ".next/**",
+      ".turbo/**",
+      "__pycache__/**",
+      "*.pyc",
+      ".venv/**",
+      "venv/**"
+    ]
+  }
+}
