@@ -17,6 +17,15 @@ Before making any changes, read these files in order:
 
 These three files are the single source of truth. Do not duplicate their content.
 
+## Orchestrator-Worker Protocol
+
+Apply the Orchestrator-Worker Protocol from `.github/copilot-instructions.md`:
+
+1. For any task with 3+ steps, output the decomposition plan before executing
+2. **Orchestrator tasks** (this session): architecture, security, complex debugging, API design
+3. **Worker tasks** (new minimal Cascade session): boilerplate, CRUD, renaming, formatting, JSDoc, test stubs
+4. Use Windsurf's Cascade for worker tasks â€” start fresh context with only the task + required file inputs
+
 ## Critical Rules
 
 1. After every change â†’ update `.github/PROJECT_STATE.md` (current state, not changelog)

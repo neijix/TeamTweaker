@@ -11,6 +11,53 @@
 
 The directives in `.github/copilot-instructions.md` govern this session. This section maps them to Claude Code's execution model.
 
+### `.claude/` Structure â€” Plugin System
+
+```
+.claude/
+â”œâ”€â”€ settings.json          # Pre-authorized commands and permissions
+â””â”€â”€ commands/
+    â””â”€â”€ learn.md           # /learn â€” extract conversation insights â†’ KNOWLEDGE.md
+```
+
+**Adding custom slash commands:** create a `.md` file in `.claude/commands/` with this frontmatter:
+
+```markdown
+---
+description: What this command does and when to use it
+argument-hint: [optional: describes $ARGUMENTS]
+model: opus          # opus | sonnet | haiku
+allowed-tools: Read, Write, Edit, Glob, Grep
+---
+```
+
+**Available slash commands in this project:**
+
+| Command | Description |
+|---|---|
+| `/learn [topic]` | Analyze the current conversation and save non-obvious insights to `.github/KNOWLEDGE.md`. Uses Opus. |
+
+### Orchestrator-Worker â€” Claude Code Implementation
+
+Apply the Orchestrator-Worker Protocol from `copilot-instructions.md` using Claude Code's native `Agent` tool:
+
+```
+# Low-complexity worker task â†’ spawn Haiku sub-agent
+Agent(subagent_type="haiku", prompt="[worker task description + inputs]")
+
+# Medium task â†’ spawn Sonnet sub-agent
+Agent(subagent_type="sonnet", prompt="[task]")
+
+# Run independent worker tasks in parallel (single message, multiple Agent calls)
+```
+
+**Rules for sub-agents:**
+- Pass all required context in the prompt â€” sub-agents start cold with no conversation history
+- Run independent tasks in parallel (single message, multiple Agent calls)
+- Never spawn a sub-agent for tasks under 2 minutes â€” direct execution is faster
+- Haiku for: boilerplate, formatting, renaming, JSDoc, simple config edits, test stubs
+- Sonnet/current model for: architecture, security, complex debugging, design decisions
+
 ### Pre-Authorized Commands
 
 The following commands are pre-authorized via `.claude/settings.json` and run without prompting:

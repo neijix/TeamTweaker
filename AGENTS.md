@@ -26,6 +26,15 @@ Read these files before making changes:
 - `.github/KNOWLEDGE.md` - solutions, workarounds, and learned patterns
 - `[README.md / docs/architecture.md / CONTRIBUTING.md]` - project-specific docs
 
+## Orchestrator-Worker Protocol
+
+Apply the Orchestrator-Worker Protocol from `.github/copilot-instructions.md`:
+
+1. For any task with 3+ steps, output the decomposition plan (JSON) before executing
+2. **Orchestrator tasks** (this agent): architecture, security, complex debugging, API design
+3. **Worker tasks** (delegate/minimize context): boilerplate, CRUD, renaming, formatting, JSDoc, test stubs
+4. Keep worker task prompts minimal â€” include only the task + required inputs
+
 ## Critical Rules
 
 1. After every meaningful change, update `.github/PROJECT_STATE.md`

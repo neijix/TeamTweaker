@@ -21,6 +21,18 @@ Before making any changes, read these files:
 2. `.github/PROJECT_STATE.md` â€” current state of the project
 3. `.github/KNOWLEDGE.md` â€” solutions, workarounds, and learned patterns
 
+## Orchestrator-Worker Protocol â€” Cursor Implementation
+
+Apply the Orchestrator-Worker Protocol from `.github/copilot-instructions.md`. In Cursor:
+
+1. **Plan first**: For any task with 3+ steps, output the decomposition JSON (orchestrator + worker tasks) before executing
+2. **Delegate worker tasks**: Start a new, minimal-context Agent session for each LOW-complexity task â€” include only the task description and required inputs, nothing else
+3. **Use lighter models for worker tasks**: In Cursor's model selector, switch to a faster/cheaper model (GPT-4o-mini, Claude Haiku) for execution tasks
+4. **Parallel execution**: If worker tasks are independent, open multiple agent tabs and run them simultaneously
+
+Worker tasks are: boilerplate, CRUD, renaming, formatting, JSDoc, test stubs, simple config edits.
+Orchestrator tasks are: architecture, security decisions, complex debugging, API design.
+
 ## Critical Rules
 
 1. After every change â†’ update `.github/PROJECT_STATE.md` (current state, not changelog)

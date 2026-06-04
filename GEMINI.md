@@ -48,6 +48,19 @@ These three files are the **single source of truth**. Do not duplicate their con
 â””â”€â”€ README.md                      # Project overview
 ```
 
+## Orchestrator-Worker Protocol â€” Gemini Implementation
+
+Apply the Orchestrator-Worker Protocol from `.github/copilot-instructions.md`:
+
+1. **Route by model capability**:
+   - **Gemini Pro / Ultra / 2.0** â†’ orchestration: architecture, security, complex reasoning, API design
+   - **Gemini Flash** â†’ worker tasks: boilerplate, formatting, renaming, test stubs, JSDoc, CRUD
+2. For any task with 3+ steps, output the decomposition JSON before executing
+3. Keep worker task context minimal â€” pass only the task description + required file content
+
+Worker tasks: boilerplate, CRUD, renaming, formatting, JSDoc, test stubs, simple config edits.
+Orchestrator tasks: architecture, security decisions, complex debugging, API design.
+
 ## Critical Rules
 
 1. **After every change**, update `.github/PROJECT_STATE.md` with the current state
