@@ -42,6 +42,14 @@ chrome.runtime.onInstalled.addListener((details) => {
 if (chrome.sidePanel) {
   chrome.action.setPopup({ popup: "" }).catch(() => {});
   chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(() => {});
+
+  // Fallback for browsers (e.g. Vivaldi) that expose chrome.sidePanel but do not
+  // automatically open the panel on icon click when openPanelOnActionClick is set.
+  // In Chrome/Edge this listener is never reached because the browser intercepts the
+  // icon click before dispatching action.onClicked when openPanelOnActionClick is true.
+  chrome.action.onClicked.addListener((tab) => {
+    chrome.sidePanel.open({ windowId: tab.windowId }).catch(() => {});
+  });
 }
 
 // Update badge to show how many features are active
