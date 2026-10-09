@@ -39,6 +39,6 @@ Do not duplicate their content here — this file only adds Antigravity-specific
 - Never commit secrets — fetch them from the team's secret manager at
   runtime (`dev-secrets` skill under `Code/`, `work-secrets` under `UbisoftCode/`)
 
-- Every project keeps a one-click Switchboard-discoverable launcher and a one-command
-  deploy — see the `launch-and-deploy` skill
+- Every project keeps a one-click launcher the D3SKHAND tray discovers (`switchboard.json`)
+  and a one-command deploy — see the `launch-and-deploy` skill
 
