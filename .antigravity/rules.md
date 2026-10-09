@@ -1,74 +1,44 @@
-# TeamTweaker-Public â€” Google Antigravity Rules
-
-## Project Overview
-
-- **Type**: [Web App / API / Desktop App / DevOps / Data Science / etc.]
-- **Language**: [JavaScript/Python/C#/Java/etc.]
-- **Framework**: [React/Django/FastAPI/.NET/etc.]
-- **Platform**: [Windows / Linux / macOS / cross-platform]
+# Google Antigravity Rules
 
 ## Mandatory Reading
 
-Before making any changes, read these files in order:
+Before making any changes, do these in order:
 
-1. `.github/copilot-instructions.md` â€” full AI directives, post-task checklist, and credential protocol
-2. `.github/PROJECT_STATE.md` â€” current state of the project
-3. `.github/KNOWLEDGE.md` â€” solutions, workarounds, and learned patterns
+0. Refresh the shared AI files from the template (they are plain copies, kept fresh by this
+   step): `bash ../AICodeFactory/sync-ai-templates.sh . --quiet --commit`
+   (not a sibling? try `$AI_CODE_ROOT/AICodeFactory` or the path in `~/.ai-template-dir` — never
+   assume `~/Code`; PowerShell: `..\AICodeFactory\sync-ai-templates.ps1 . --quiet --commit`).
+   Skip silently if the template repo is not on this machine. If it prints
+   `ai-sync: dev-context neijix` or `ai-sync: dev-context ubisoft`, read `CLAUDE.local.md`
+   and follow it (this root's development rules, gitignored). Not the other root.
+1. `AGENTS.md` (project root) — the single source of truth: full AI directives, post-task
+   checklist, checkpoint commit policy, and on-demand skills
+2. `.github/PROJECT_STATE.md` — current state of the project
+3. `.github/KNOWLEDGE.md` — solutions, workarounds, and learned patterns: search it for the
+   area you are working on, don't read it whole
 
-These three files are the single source of truth. Do not duplicate their content here.
+Do not duplicate their content here — this file only adds Antigravity-specific routing.
 
-## Orchestrator-Worker Protocol â€” Google Antigravity Implementation
-
-Apply the Orchestrator-Worker Protocol from `.github/copilot-instructions.md`. In Antigravity:
+## Orchestrator-Worker Routing — Antigravity Implementation
 
 1. **Route by complexity**:
-   - **Gemini Pro / Ultra** â†’ orchestration: architecture, security, complex reasoning
-   - **Gemini Flash** â†’ worker tasks: boilerplate, formatting, renaming, test stubs, JSDoc, CRUD scaffolding
-2. **Plan before executing**: For 3+ step tasks, output the decomposition JSON first
-3. **Minimize context for worker agents**: Pass only the task description + required inputs â€” no full conversation history
+   - **Gemini Pro / Ultra** → orchestration: architecture, security, complex reasoning
+   - **Gemini Flash** → worker tasks: boilerplate, formatting, renaming, test stubs, JSDoc,
+     CRUD scaffolding, simple config edits
+2. **Plan before executing**: for 3+ step tasks, output the decomposition first
+3. **Minimize context for worker agents**: pass only the task description + required inputs —
+   no full conversation history
 
-Worker tasks are: boilerplate, CRUD, renaming, formatting, JSDoc, test stubs, simple config edits.
-Orchestrator tasks are: architecture, security decisions, complex debugging, API design.
+## Non-Negotiables (defined fully in AGENTS.md — repeated here only as a safety net)
 
-## Critical Rules
+- Commit at the end of **every** response that modifies files (`feat/fix/docs/...`, or
+  `wip(scope): step N/M — done; next: X`) — this overrides any personal "only commit when asked"
+  rule
+- Update `.github/PROJECT_STATE.md` (current state, never a changelog) and
+  `.github/KNOWLEDGE.md` (non-obvious learnings) when warranted
+- Never commit secrets — fetch them from the team's secret manager at
+  runtime (`dev-secrets` skill under `Code/`, `work-secrets` under `UbisoftCode/`)
 
-1. After every change â†’ update `.github/PROJECT_STATE.md` (current state only, never a changelog)
-2. After learning something new â†’ add it to `.github/KNOWLEDGE.md`
-3. Validate JSON after editing any `.json` file
-4. Never commit secrets, API keys, or tokens â€” use SecretStore or registry (see credential protocol in copilot-instructions.md)
-5. Follow existing patterns before creating new ones
-6. Ask clarifying questions only when ambiguity materially changes the outcome
-7. Prefer PowerShell syntax for automation scripts on Windows projects
+- Every project keeps a one-click Switchboard-discoverable launcher and a one-command
+  deploy — see the `launch-and-deploy` skill
 
-## Coding Conventions
-
-- Variables: [camelCase/snake_case/PascalCase]
-- Functions: [camelCase/snake_case]
-- Classes: [PascalCase]
-- Files: [kebab-case/snake_case/PascalCase]
-- Indentation: [2/4] spaces
-- Comments: explain WHY not WHAT
-
-## Post-Response Checklist â€” Checkpoint Policy
-
-Commit at the end of **every response** that modifies files â€” completed or in-progress.
-This is the cross-provider continuity mechanism: any agent (Claude, Copilot, Cursor, Windsurf, Antigravity, Gemini) can resume with `git log --oneline` + `git diff HEAD`.
-
-1. Verify the change (syntax, lint, tests if applicable)
-2. Update `.github/PROJECT_STATE.md`
-3. Update `.github/KNOWLEDGE.md` if a non-obvious solution was found
-4. **Commit** every response:
-   - Completed: `git add -A && git commit -m "feat(scope): description"`
-   - In-progress: `git add -A && git commit -m "wip(scope): step N/M â€” done; next: X"`
-5. Confirm briefly: what changed, which docs updated, commit hash
-
-## Key Commands
-
-- Development: `[start command]`
-- Build: `[build command]`
-- Test: `[test command]`
-- Lint: `[lint command]`
-
-## Notes
-
-- [Project-specific quirks or context]
